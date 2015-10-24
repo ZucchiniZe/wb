@@ -6,7 +6,8 @@
         paths = [],
         dataToSend = {},
         dataSendFn,
-        dataSendActive = false;
+        dataSendActive = false,
+        backgroundColor;
 
     try {
         var socket = io();
@@ -34,7 +35,10 @@
         pen.onMouseDrag = handleDrawPath(clientPath, {
             eventName: 'pen:extend'
         });
-        pen.onMouseUp = stopDataSend();
+
+        eraser.onMouseDown = handleNewPath(clientPath);
+        eraser.onMouseDrag = handleDrawPath(clientPath);
+        pen.onMouseUp = eraser.onMouseUp = stopDataSend();
 
         socket.on('pen:create', handleNewPath(socketPath));
         socket.on('pen:extend', handleDrawPath(socketPath));
@@ -115,15 +119,6 @@
             clearInterval(dataSendFn);
             dataSendActive = false;
         }
-    }
-
-    function resizeCanvas($canvas, $parent) {
-        var aspect = $canvas.height / $canvas.width,
-            width = $parent.offsetWidth,
-            height = $parent.offsetHeight;
-
-        $canvas.width = width;
-        $canvas.height = Math.round(aspect * width);
     }
 
 })(wb);
