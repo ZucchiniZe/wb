@@ -21,11 +21,27 @@
         draw = new paper.Tool();
         //erase = new paper.Tool();
 
-        draw.onMouseDown = handleNewPath(path);
-        draw.onMouseDrag = handleDrawPath(path);
+        draw.onMouseDown = function (e) {
+            path = new paper.Path();
+            path.strokeColor = 'black';
+            path.add(e.point);
 
-        socket.on('path:new', handleNewPath(socketPath));
-        socket.on('path:draw', handleDrawPath(socketPath));
+            //socket.emit('path:new', e);
+        };
+        draw.onMouseDrag = function (e) {
+            path.add(e.point);
+
+            //socket.emit('path:draw', e);
+        };
+
+        socket.on('path:new', function (e) {
+            socketPath = new paper.Path();
+            socketPath.strokeColor = 'black';
+            socketPath.add(e.point);
+        });
+        socket.on('path:draw', function (e) {
+            socketPath.add(e.point);
+        });
 
         paper.view.draw();
 
