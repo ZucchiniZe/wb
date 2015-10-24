@@ -1,0 +1,17 @@
+{
+  "name": "wb",
+  "version": "0.0.0",
+  "homepage": "https://github.com/szimmer1/wb",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "public/bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "paper": "~0.9.24"
+  }
+}

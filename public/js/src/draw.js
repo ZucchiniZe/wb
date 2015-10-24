@@ -34,10 +34,7 @@
         pen.onMouseDrag = handleDrawPath(clientPath, {
             eventName: 'pen:extend'
         });
-
-        eraser.onMouseDown = handleNewPath(clientPath);
-        eraser.onMouseDrag = handleDrawPath(clientPath);
-        pen.onMouseUp = eraser.onMouseUp = stopDataSend();
+        pen.onMouseUp = stopDataSend();
 
         socket.on('pen:create', handleNewPath(socketPath));
         socket.on('pen:extend', handleDrawPath(socketPath));
@@ -118,6 +115,15 @@
             clearInterval(dataSendFn);
             dataSendActive = false;
         }
+    }
+
+    function resizeCanvas($canvas, $parent) {
+        var aspect = $canvas.height / $canvas.width,
+            width = $parent.offsetWidth,
+            height = $parent.offsetHeight;
+
+        $canvas.width = width;
+        $canvas.height = Math.round(aspect * width);
     }
 
 })(wb);
