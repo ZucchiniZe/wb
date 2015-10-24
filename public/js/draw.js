@@ -1,8 +1,9 @@
 (function(wb) {
 
     var pen, eraser,
-        path = new wb.PathManager(),
+        currentPath = new wb.PathManager(),
         socketPath = new wb.PathManager(),
+        paths = [],
         dataToSend = {},
         dataSendFn,
         dataSendActive = false;
@@ -27,8 +28,10 @@
         pen.minDistance = 10;
         //eraser = new paper.Tool();
 
-        pen.onMouseDown = handleNewPath(path);
-        pen.onMouseDrag = handleDrawPath(path);
+        pen.onMouseDown = handleNewPath(currentPath, {
+            eventName: 'pen:create'
+        });
+        pen.onMouseDrag = handleDrawPath(currentPath);
         pen.onMouseUp = stopDataSend();
 
         socket.on('pen:create', handleNewPath(socketPath));
@@ -40,40 +43,38 @@
 
     function handleNewPath(pm, sendOpts) {
         return function (e) {
-            // always make a new path
+            // always make a new currentPath
             pm.setPath(new paper.Path());
 
-            var path = pm.getPath();
-            path.strokeColor = 'black';
-            path.add(e.point);
+            var currentPath = pm.getPath();
+            currentPath.strokeColor = 'black';
+            currentPath.add(e.point);
 
             if (sendOpts) {
-                sendData(sendOpts.eventName, sendOpts.socket, e);
+                sendData(sendOpts.eventName, e);
             }
         }
     }
 
     function handleDrawPath(pm, sendOpts) {
         return function (e) {
-
-            debugger;
             // there should already be a path on the pathmanager
-            var path = pm.getPath();
+            var currentPath = pm.getPath();
 
-            path.add(e.point);
+            currentPath.add(e.point);
 
             if (sendOpts) {
-                sendData(sendOpts.eventName, sendOpts.socket, e);
+                sendData(sendOpts.eventName, e);
             }
         }
     }
 
-    function sendData(eventName, socket, data) {
+    function sendData(eventName, data) {
         dataToSend = data;
 
         if (!dataSendActive) {
             dataSendFn = setInterval(function emit() {
-                socket.emit(eventName, dataToSend);
+                socket.emit(eventName, JSON.stringify(data.point));
             }, 100);
             dataSendActive = true;
         }
@@ -82,11 +83,8 @@
     function stopDataSend() {
         return function() {
             clearInterval(dataSendFn);
+            dataSendActive = false;
         }
-    }
-
-    function emit(socket, eventName, data) {
-        socket.emit(eventName, data);
     }
 
     function resizeCanvas($canvas, $parent) {
