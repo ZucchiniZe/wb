@@ -15,11 +15,17 @@ io.on('connection', function(socket) {
         console.log('user disconnected');
     });
 
-    socket.on('draw:line', function(data) {
+    socket.on('pen:create', function(data) {
+        console.log('create line', data);
+
+        socket.broadcast.emit('pen:create', data);
+    });
+
+    socket.on('pen:extend', function(data) {
         console.log('drew line', data);
 
-        socket.broadcast.emit('draw:line', data);
-    })
+        socket.broadcast.emit('pen:extend', data);
+    });
 });
 
 // express GET / and static /public files
