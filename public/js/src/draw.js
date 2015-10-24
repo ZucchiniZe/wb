@@ -1,7 +1,7 @@
 (function(wb) {
 
     var pen, eraser,
-        currentPath = new wb.PathManager(),
+        clientPath = new wb.PathManager(),
         socketPath = new wb.PathManager(),
         paths = [],
         dataToSend = {},
@@ -26,12 +26,14 @@
 
         pen = new paper.Tool();
         pen.minDistance = 10;
-        //eraser = new paper.Tool();
+        eraser = new paper.Tool();
 
-        pen.onMouseDown = handleNewPath(currentPath, {
+        pen.onMouseDown = handleNewPath(clientPath, {
             eventName: 'pen:create'
         });
-        pen.onMouseDrag = handleDrawPath(currentPath);
+        pen.onMouseDrag = handleDrawPath(clientPath, {
+            eventName: 'pen:extend'
+        });
         pen.onMouseUp = stopDataSend();
 
         socket.on('pen:create', handleNewPath(socketPath));
@@ -43,25 +45,43 @@
 
     function handleNewPath(pm, sendOpts) {
         return function (e) {
-            // always make a new currentPath
+            if (typeof e === 'string') {
+                e = JSON.parse(e);
+                e.point = correctPoint(e);
+            }
+
+            // save reference to the old path
+            pm.pushPath(pm.getPath());
+
+            // make a new path
             pm.setPath(new paper.Path());
 
-            var currentPath = pm.getPath();
-            currentPath.strokeColor = 'black';
-            currentPath.add(e.point);
+            // set path properties
+            var path = pm.getPath();
+            path.strokeColor = 'black';
+
+            path.add(e.point);
 
             if (sendOpts) {
-                sendData(sendOpts.eventName, e);
+                sendData(sendOpts.eventName, e, true);
             }
         }
     }
 
     function handleDrawPath(pm, sendOpts) {
         return function (e) {
-            // there should already be a path on the pathmanager
-            var currentPath = pm.getPath();
+            if (typeof e === 'string') {
+                e = JSON.parse(e);
+                e.point = correctPoint(e)
+            }
 
-            currentPath.add(e.point);
+            // there should already be a path on the pathmanager
+            var path = pm.getPath();
+
+            path.add(e.point);
+
+            // re-smooth path
+            path.smooth();
 
             if (sendOpts) {
                 sendData(sendOpts.eventName, e);
@@ -69,13 +89,23 @@
         }
     }
 
-    function sendData(eventName, data) {
-        dataToSend = data;
+    function correctPoint(e) {
+        return new paper.Point(e.point[1], e.point[2]);
+    }
 
-        if (!dataSendActive) {
+    function sendData(eventName, data, once) {
+        dataToSend = {
+            eventName: eventName,
+            point: data.point
+        };
+
+        if (once) {
+            socket.emit(dataToSend.eventName, JSON.stringify(dataToSend));
+        }
+        else if (!dataSendActive) {
             dataSendFn = setInterval(function emit() {
-                socket.emit(eventName, JSON.stringify(data.point));
-            }, 100);
+                socket.emit(dataToSend.eventName, JSON.stringify(dataToSend));
+            }, 25);
             dataSendActive = true;
         }
     }
