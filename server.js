@@ -1,14 +1,12 @@
 'use strict';
 
-var express = require('express'),
-    socket = require('socket.io');
-
+var express = require('express');
 var app = express();
 
 var server = require('http').createServer(app),
     PORT = 4000;
 
-var io = socket(server);
+var io = require('socket.io')(server);
 
 io.on('connection', function(socket) {
     console.log('user connected');
@@ -29,7 +27,7 @@ app.get('/', function(req,res) {
     res.sendFile(__dirname + '/public/index.html');
 });
 
-app.use('/public', express.static('public'));
+app.use(express.static('public'));
 
 server.listen(PORT);
 console.log("server listening on port",PORT);
