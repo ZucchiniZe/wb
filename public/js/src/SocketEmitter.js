@@ -5,7 +5,7 @@ var wb;
         var pm = function(socket) {
             this.socket = socket;
             this.lastData = null;
-            this.dataToSend = null;
+            this.nextData = null;
             this.dataSendActive = false;
             this.dataSendFn = null;
         };
@@ -64,15 +64,20 @@ class SocketEmitter {
         this.$$nextData = data;
     }
 
-    sendData(eventName, once = false) {
+    sendData(eventName, data, once = false) {
         var self = this;
 
+        self.$$nextData = {
+            eventName: eventName,
+            point: data.point
+        };
+
         if (once) {
-            self.socket.emit(self.nextData.eventName, JSON.stringify(self.nextData));
+            self.socket.emit(self.$$nextData.eventName, JSON.stringify(self.$$nextData));
         }
         else if (!self.dataSendActive) {
             self.dataSendFn = setInterval(function emit() {
-                self.socket.emit(self.nextData.eventName, JSON.stringify(self.dataToSend));
+                self.socket.emit(self.$$nextData.eventName, JSON.stringify(self.$$nextData));
             }, 25);
             self.dataSendActive = true;
         }

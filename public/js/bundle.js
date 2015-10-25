@@ -52,14 +52,9 @@
 
 	var _PathManager2 = _interopRequireDefault(_PathManager);
 
-	var pen,
-	    eraser,
-	    clientPath = new _PathManager2['default'](),
-	    socketPath = new _PathManager2['default'](),
-	    paths = [],
-	    dataToSend = {},
-	    dataSendFn,
-	    dataSendActive = false;
+	var _SocketEmitter = __webpack_require__(2);
+
+	var _SocketEmitter2 = _interopRequireDefault(_SocketEmitter);
 
 	try {
 	    var socket = io();
@@ -68,6 +63,12 @@
 	    console.warn("paper.js or socket.io scripts didn't load synchronously before client script");
 	    throw e;
 	}
+
+	var pen,
+	    eraser,
+	    clientPath = new _PathManager2['default'](),
+	    socketPath = new _PathManager2['default'](),
+	    emitter = new _SocketEmitter2['default'](socket);
 
 	window.onload = function () {
 
@@ -89,11 +90,9 @@
 
 	    socket.on('pen:create', handleNewPath(socketPath));
 	    socket.on('pen:extend', handleDrawPath(socketPath));
-
-	    paper.view.draw();
 	};
 
-	function handleNewPath(pm, sendOpts) {
+	function handleNewPath(pm, emit) {
 	    return function (e) {
 	        if (typeof e === 'string') {
 	            e = JSON.parse(e);
@@ -112,13 +111,13 @@
 
 	        path.add(e.point);
 
-	        if (sendOpts) {
-	            sendData(sendOpts.eventName, e, true);
+	        if (emit) {
+	            emitter.sendData(emit.eventName, e, true);
 	        }
 	    };
 	}
 
-	function handleDrawPath(pm, sendOpts) {
+	function handleDrawPath(pm, emit) {
 	    return function (e) {
 	        if (typeof e === 'string') {
 	            e = JSON.parse(e);
@@ -131,10 +130,12 @@
 	        path.add(e.point);
 
 	        // re-smooth path
-	        // path.smooth();
+	        path.smooth();
 
-	        if (sendOpts) {
-	            sendData(sendOpts.eventName, e);
+	        paper.view.draw();
+
+	        if (emit) {
+	            emitter.sendData(emit.eventName, e);
 	        }
 	    };
 	}
@@ -143,26 +144,10 @@
 	    return new paper.Point(e.point[1], e.point[2]);
 	}
 
-	function sendData(eventName, data, once) {
-	    dataToSend = {
-	        eventName: eventName,
-	        point: data.point
-	    };
-
-	    if (once) {
-	        socket.emit(dataToSend.eventName, JSON.stringify(dataToSend));
-	    } else if (!dataSendActive) {
-	        dataSendFn = setInterval(function emit() {
-	            socket.emit(dataToSend.eventName, JSON.stringify(dataToSend));
-	        }, 25);
-	        dataSendActive = true;
-	    }
-	}
-
 	function stopDataSend() {
 	    return function () {
-	        clearInterval(dataSendFn);
-	        dataSendActive = false;
+	        clearInterval(emitter.dataSendFn);
+	        emitter.dataSendActive = false;
 	    };
 	}
 
@@ -212,6 +197,109 @@
 	})();
 
 	module.exports = PathManager;
+
+/***/ },
+/* 2 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var wb;
+	(function (wb) {
+
+	    wb.SocketEmitter = function () {
+	        var pm = function pm(socket) {
+	            this.socket = socket;
+	            this.lastData = null;
+	            this.nextData = null;
+	            this.dataSendActive = false;
+	            this.dataSendFn = null;
+	        };
+
+	        pm.prototype.setData = function (data) {
+	            this.dataToSend = data;
+	        };
+
+	        pm.prototype.sendData = function (eventName, data, once) {
+	            var self = this;
+
+	            self.setData({
+	                eventName: eventName,
+	                point: data.point
+	            });
+
+	            if (once) {
+	                socket.emit(self.dataToSend.eventName, JSON.stringify(self.dataToSend));
+	            } else if (!self.dataSendActive) {
+	                self.dataSendFn = setInterval(function emit() {
+	                    socket.emit(self.dataToSend.eventName, JSON.stringify(self.dataToSend));
+	                }, 25);
+	                self.dataSendActive = true;
+	            }
+	        };
+
+	        return pm;
+	    };
+	})(wb || (wb = {}));
+
+	var SocketEmitter = (function () {
+	    function SocketEmitter(socket) {
+	        _classCallCheck(this, SocketEmitter);
+
+	        this.socket = socket;
+	        this.$$lastData = null;
+	        this.$$nextData = null;
+	        this.dataSendActive = false;
+	        this.dataSendFn = null;
+	    }
+
+	    _createClass(SocketEmitter, [{
+	        key: "sendData",
+	        value: function sendData(eventName, data) {
+	            var once = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+
+	            var self = this;
+
+	            self.$$nextData = {
+	                eventName: eventName,
+	                point: data.point
+	            };
+
+	            if (once) {
+	                self.socket.emit(self.$$nextData.eventName, JSON.stringify(self.$$nextData));
+	            } else if (!self.dataSendActive) {
+	                self.dataSendFn = setInterval(function emit() {
+	                    self.socket.emit(self.$$nextData.eventName, JSON.stringify(self.$$nextData));
+	                }, 25);
+	                self.dataSendActive = true;
+	            }
+	        }
+	    }, {
+	        key: "lastData",
+	        get: function get() {
+	            return this.$$lastData;
+	        },
+	        set: function set(data) {
+	            this.$$lastData = data;
+	        }
+	    }, {
+	        key: "nextData",
+	        get: function get() {
+	            return this.$$nextData;
+	        },
+	        set: function set(data) {
+	            this.$$nextData = data;
+	        }
+	    }]);
+
+	    return SocketEmitter;
+	})();
+
+	module.exports = SocketEmitter;
 
 /***/ }
 /******/ ]);
