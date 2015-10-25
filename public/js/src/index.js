@@ -1,13 +1,6 @@
 
     import PathManager from './PathManager';
-
-    var pen, eraser,
-        clientPath = new PathManager(),
-        socketPath = new PathManager(),
-        paths = [],
-        dataToSend = {},
-        dataSendFn,
-        dataSendActive = false;
+    import SocketEmitter from './SocketEmitter';
 
     try {
         var socket = io();
@@ -17,6 +10,11 @@
         console.warn("paper.js or socket.io scripts didn't load synchronously before client script");
         throw e;
     }
+
+    var pen, eraser,
+        clientPath = new PathManager(),
+        socketPath = new PathManager(),
+        emitter = new SocketEmitter(socket);
 
     window.onload = function () {
 
@@ -39,11 +37,9 @@
         socket.on('pen:create', handleNewPath(socketPath));
         socket.on('pen:extend', handleDrawPath(socketPath));
 
-        paper.view.draw();
-
     };
 
-    function handleNewPath(pm, sendOpts) {
+    function handleNewPath(pm, emit) {
         return function (e) {
             if (typeof e === 'string') {
                 e = JSON.parse(e);
@@ -62,13 +58,13 @@
 
             path.add(e.point);
 
-            if (sendOpts) {
-                sendData(sendOpts.eventName, e, true);
+            if (emit) {
+                emitter.sendData(emit.eventName, e, true);
             }
         }
     }
 
-    function handleDrawPath(pm, sendOpts) {
+    function handleDrawPath(pm, emit) {
         return function (e) {
             if (typeof e === 'string') {
                 e = JSON.parse(e);
@@ -81,10 +77,12 @@
             path.add(e.point);
 
             // re-smooth path
-            // path.smooth();
+            path.smooth();
 
-            if (sendOpts) {
-                sendData(sendOpts.eventName, e);
+            paper.view.draw();
+
+            if (emit) {
+                emitter.sendData(emit.eventName, e);
             }
         }
     }
@@ -93,27 +91,10 @@
         return new paper.Point(e.point[1], e.point[2]);
     }
 
-    function sendData(eventName, data, once) {
-        dataToSend = {
-            eventName: eventName,
-            point: data.point
-        };
-
-        if (once) {
-            socket.emit(dataToSend.eventName, JSON.stringify(dataToSend));
-        }
-        else if (!dataSendActive) {
-            dataSendFn = setInterval(function emit() {
-                socket.emit(dataToSend.eventName, JSON.stringify(dataToSend));
-            }, 25);
-            dataSendActive = true;
-        }
-    }
-
     function stopDataSend() {
         return function() {
-            clearInterval(dataSendFn);
-            dataSendActive = false;
+            clearInterval(emitter.dataSendFn);
+            emitter.dataSendActive = false;
         }
     }
 

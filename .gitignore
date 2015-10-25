@@ -2,4 +2,5 @@ public/bower_components
 node_modules
 .idea
 DS_Store
-*.tern-port*
+npm-debug.log*
+.tern-port*
