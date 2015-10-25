@@ -6,6 +6,7 @@ class SocketEmitter {
         this.$$nextData = null;
         this.dataSendActive = false;
         this.dataSendFn = null;
+        this.$$interval = 15;
     }
 
     get lastData() {
@@ -48,7 +49,7 @@ class SocketEmitter {
                     self.$$lastData = self.$$nextData;
                     self.socket.emit(self.$$nextData.eventName, JSON.stringify(self.$$nextData));
                 }
-            }, 25);
+            }, self.$$interval);
             self.dataSendActive = true;
         }
     }

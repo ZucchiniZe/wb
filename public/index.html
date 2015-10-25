@@ -4,17 +4,57 @@
     <meta charset="UTF-8">
     <title>paper stuff</title>
 
+    <link rel="stylesheet" href="/bower_components/font-awesome/css/font-awesome.min.css" />
     <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
-    <div id="container" class="canvas-container">
-        <div id="toolbar">
+    <div id="container" ng-app="wb:gui" class="canvas-container">
+        <div id="toolbar" ng-controller="gui">
             <div class="btn-group" role="group">
-                <button class="btn btn-default">Pen</button>
-                <button class="btn btn-default">Eraser</button>
+                <button class="btn btn-default"><i class="fa fa-pencil"></i></button>
+                <button class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
+                <ul class="dropdown-menu">
+                    <li ng-repeat="size in pen.sizes">
+                        <a href="#" ng-click="selectSize.call(pen,size)">
+                            <svg height="{{ size * 2 }}" width="{{ size * 2 }}">
+                                <circle cx="{{ size }}" cy="{{ size }}" r="{{ size - size/5 }}" stroke="black" stroke-width="2px" />
+                            </svg>
+                        </a>
+                    </li>
+                </ul>
             </div>
-            <button ng-repeat="user in users" class="btn-default" ng-style=""></button>
+            <div class="btn-group" role="group">
+                <button class="btn btn-default"><i class="fa fa-paint-brush"></i></button>
+                <button class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
+                <ul class="dropdown-menu">
+                    <li ng-repeat="size in paintbrush.sizes">
+                        <a href="#" class="active" ng-click="selectSize.call(paintbrush,size)">
+                            <svg height="{{ size * 2 }}" width="{{ size * 2 }}">
+                                <circle cx="{{ size }}" cy="{{ size }}" r="{{ size - size/5 }}" stroke="black" stroke-width="2px" />
+                            </svg>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="btn-group" role="group">
+                <button class="btn btn-default"><i class="fa fa-eraser"></i></button>
+                <button class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
+                <ul class="dropdown-menu">
+                    <li ng-repeat="size in eraser.sizes">
+                        <a href="#" ng-click="selectSize.call(eraser,size)">
+                            <svg height="{{ size * 2 }}" width="{{ size * 2 }}">
+                                <circle cx="{{ size }}" cy="{{ size }}" r="{{ size - size/5 }}" stroke="black" stroke-width="2px" />
+                            </svg>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="btn-group pull-right" role="group">
+                <button class="btn btn-default"><i class="fa fa-download"></i></button>
+                <button class="btn btn-default"><i class="fa fa-link"></i></button>
+            </div>
+            <button ng-repeat="(user,uid) in users" class="btn btn-default user-badge ng-cloak" ng-style="user.style">{{ user.name || uid }}</button>
         </div>
         <canvas id="canvas" resize="true" keepalive="true"></canvas>
     </div>
