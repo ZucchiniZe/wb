@@ -1,6 +1,8 @@
 FROM node:4.2.1
 MAINTAINER Alex B <me@alexb.io>
 
+ENV debug=prod
+
 WORKDIR /usr/src/app
 
 RUN npm install -g bower
@@ -15,4 +17,4 @@ RUN npm run compile
 
 EXPOSE 4000
 
-CMD ["DEBUG=prod", "node", "index.js"]
+CMD ["node", "index.js"]
