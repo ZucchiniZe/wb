@@ -26,7 +26,8 @@ export default class GUI {
                 'UsersService',
                 'ToolService',
                 'PathManagerService',
-                function ($scope, UsersService, Tool, PathManager) {
+                '$window',
+                function ($scope, UsersService, Tool, PathManager, $window) {
 
                     var clientPath = PathManager.getClient(),
                         socketPath = PathManager.getSocket();
@@ -63,6 +64,10 @@ export default class GUI {
                         userColor += '0';
                     }
                     userColor += randomHex;
+
+                    $scope.clear = function() {
+                        paper.project.clear();
+                    };
 
                     $scope.selectTool = function (type) {
                         $scope.selectedTool = type;

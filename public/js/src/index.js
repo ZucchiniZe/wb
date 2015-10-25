@@ -24,4 +24,7 @@ window.onload = function () {
 
     console.log('pathname:', pathname, 'path:', path);
     socket.emit('health:alive', path);
+
+    // for angular to use in $window service
+    window.wbcanvas = canvas;
 };
