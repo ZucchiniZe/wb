@@ -1,6 +1,6 @@
 import SocketEmitterService from './SocketEmitterService';
 
-class HandlerFactory {
+export default class HandlerFactory {
 
     static hasInstance() {
         if (!this.$$instance) {
@@ -52,7 +52,7 @@ class HandlerFactory {
                             if (opts && opts.emit) {
                                 emitter.sendData(opts.emit.eventName, Object.assign(e, {width: pm.width, color: pm.color}), true);
                             }
-                        }
+                        };
                     },
 
                     handleDrawPath: function(pm, opts) {
@@ -86,7 +86,7 @@ class HandlerFactory {
                             if (opts && opts.emit) {
                                 emitter.sendData(opts.emit.eventName, Object.assign(e, {width: pm.width, color: pm.color}));
                             }
-                        }
+                        };
                     },
 
                     handleDrawCursor: function(opts) {
@@ -106,11 +106,9 @@ class HandlerFactory {
                         }
                         return function(e) {
                             cursor.position = e.point;
-                        }
+                        };
                     }
-                }
-            }])
+                };
+            }]);
     }
-}
-
-module.exports = HandlerFactory;
+};

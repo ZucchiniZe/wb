@@ -1,4 +1,4 @@
-class Users {
+export default class Users {
 
     static hasInstance() {
         if (!this.$$instance) {
@@ -60,9 +60,7 @@ class Users {
 
                 return {
                     users: users
-                }
-            }])
+                };
+            }]);
     }
-}
-
-module.exports = Users;
+};

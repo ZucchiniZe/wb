@@ -25,25 +25,26 @@ let users = {};
 let colors = ["#2CB3D0","#1C7185","#D1812C","85411C","#2E2E2E","E5A9E5"];
 
 io.on('connection', function(socket) {
+    var room = 'root';
     socket.on('health:alive', data => {
-        socket.roomName = data || 'root';
+        room = data;
+        console.log('proper room name', data);
     });
 
-    console.log(socket.roomName);
-
-    socket.join(socket.roomName);
+    socket.join(room);
+    console.log('join room', room);
 
     console.log('user connected');
     let id = uid(10);
     let thisUser = {color: colors[Math.floor(Math.random() * 6)]};
 
     // notify all other sockets of new user
-    socket.broadcast.emit('user:connection', thisUser);
+    socket.broadcast.to(room).emit('user:connection', thisUser);
 
     // notify this socket of all users currently in room
     for (var _uid in users) {
         if (users.hasOwnProperty(_uid)) {
-            socket.emit('user:connection', _uid);
+            socket.to(room).emit('user:connection', _uid);
         };
     };
 
@@ -52,23 +53,25 @@ io.on('connection', function(socket) {
     users[id] = thisUser;
 
     socket.on('disconnect', () => {
-        socket.leave(socket.roomName);
+        socket.leave(room);
         console.log('user disconnected');
         delete users[id];
-        socket.broadcast.emit('user:disconnect', id);
+        socket.broadcast.to(room).emit('user:disconnect', id);
     });
 
     socket.on('pen:create', (data) => {
         console.log('create line', data);
 
-        socket.broadcast.emit('pen:create', data);
+        socket.broadcast.to(room).emit('pen:create', data);
     });
 
     socket.on('pen:extend', (data) => {
         console.log('drew line', data);
 
-        socket.broadcast.emit('pen:extend', data);
+        socket.broadcast.to(room).emit('pen:extend', data);
     });
+
+    console.log(io.sockets.adapter.rooms);
 });
 
 console.log("server listening on port", port);

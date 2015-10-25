@@ -1,4 +1,4 @@
-class SocketEmitter {
+export default class SocketEmitter {
 
     constructor(socket) {
         this.socket = socket;
@@ -29,6 +29,7 @@ class SocketEmitter {
         if (d1.point && d2.point) {
             return d1.point.equals(d2.point);
         }
+        return false;
     }
 
     sendData(eventName, data, once = false) {
@@ -57,6 +58,4 @@ class SocketEmitter {
         }
     }
 
-}
-
-module.exports = SocketEmitter;
+};

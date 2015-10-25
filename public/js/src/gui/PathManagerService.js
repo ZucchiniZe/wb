@@ -1,6 +1,6 @@
 import PathManager from '../PathManager';
 
-class PathManagerService {
+export default class PathManagerService {
 
     static hasInstance() {
         if (!this.$$instance) {
@@ -35,9 +35,7 @@ class PathManagerService {
                         }
                         return socket;
                     }
-                }
-            }])
+                };
+            }]);
     }
-}
-
-module.exports = PathManagerService;
+};

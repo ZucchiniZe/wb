@@ -1,7 +1,7 @@
 import Users from './Users';
 import Tool from './Tool';
 
-class GUI {
+export default class GUI {
 
     static hasInstance() {
         if (!this.$$instance) {
@@ -96,7 +96,4 @@ class GUI {
                 }
             ]);
     }
-
-}
-
-module.exports = GUI;
+};

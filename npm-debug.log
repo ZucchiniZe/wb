@@ -1,36 +1,41 @@
 0 info it worked if it ends with ok
-1 verbose cli [ 'node', '/usr/local/bin/npm', 'run', 'babel-node', 'server.js' ]
-2 info using npm@2.7.3
-3 info using node@v0.12.0
-4 verbose node symlink /usr/local/bin/node
-5 verbose run-script [ 'prebabel-node', 'babel-node', 'postbabel-node' ]
-6 info prebabel-node wytbord@1.0.0
-7 info babel-node wytbord@1.0.0
-8 verbose unsafe-perm in lifecycle true
-9 info wytbord@1.0.0 Failed to exec babel-node script
-10 verbose stack Error: wytbord@1.0.0 babel-node: `babel-node --stage 0 server.js`
-10 verbose stack Exit status 1
-10 verbose stack     at EventEmitter.<anonymous> (/usr/local/lib/node_modules/npm/lib/utils/lifecycle.js:213:16)
-10 verbose stack     at EventEmitter.emit (events.js:110:17)
-10 verbose stack     at ChildProcess.<anonymous> (/usr/local/lib/node_modules/npm/lib/utils/spawn.js:14:12)
-10 verbose stack     at ChildProcess.emit (events.js:110:17)
-10 verbose stack     at maybeClose (child_process.js:1008:16)
-10 verbose stack     at Process.ChildProcess._handle.onexit (child_process.js:1080:5)
-11 verbose pkgid wytbord@1.0.0
-12 verbose cwd /Users/mzimmerman/Documents/Shahar/paperjs
-13 error Darwin 14.1.0
-14 error argv "node" "/usr/local/bin/npm" "run" "babel-node" "server.js"
-15 error node v0.12.0
-16 error npm  v2.7.3
-17 error code ELIFECYCLE
-18 error wytbord@1.0.0 babel-node: `babel-node --stage 0 server.js`
-18 error Exit status 1
-19 error Failed at the wytbord@1.0.0 babel-node script 'babel-node --stage 0 server.js'.
-19 error This is most likely a problem with the wytbord package,
-19 error not with npm itself.
-19 error Tell the author that this fails on your system:
-19 error     babel-node --stage 0 server.js
-19 error You can get their info via:
-19 error     npm owner ls wytbord
-19 error There is likely additional logging output above.
-20 verbose exit [ 1, true ]
+1 verbose cli [ '/Users/alex/.nvm/versions/io.js/v3.3.1/bin/iojs',
+1 verbose cli   '/Users/alex/.nvm/versions/io.js/v3.3.1/bin/npm',
+1 verbose cli   'run',
+1 verbose cli   'babel-node',
+1 verbose cli   'server.js' ]
+2 info using npm@2.14.3
+3 info using node@v3.3.1
+4 verbose run-script [ 'prebabel-node', 'babel-node', 'postbabel-node' ]
+5 info prebabel-node wytbord@1.0.0
+6 info babel-node wytbord@1.0.0
+7 verbose unsafe-perm in lifecycle true
+8 info wytbord@1.0.0 Failed to exec babel-node script
+9 verbose stack Error: wytbord@1.0.0 babel-node: `babel-node --stage 0 "server.js"`
+9 verbose stack Exit status 1
+9 verbose stack     at EventEmitter.<anonymous> (/Users/alex/.nvm/versions/io.js/v3.3.1/lib/node_modules/npm/lib/utils/lifecycle.js:214:16)
+9 verbose stack     at emitTwo (events.js:87:13)
+9 verbose stack     at EventEmitter.emit (events.js:172:7)
+9 verbose stack     at ChildProcess.<anonymous> (/Users/alex/.nvm/versions/io.js/v3.3.1/lib/node_modules/npm/lib/utils/spawn.js:24:14)
+9 verbose stack     at emitTwo (events.js:87:13)
+9 verbose stack     at ChildProcess.emit (events.js:172:7)
+9 verbose stack     at maybeClose (internal/child_process.js:764:16)
+9 verbose stack     at Process.ChildProcess._handle.onexit (internal/child_process.js:211:5)
+10 verbose pkgid wytbord@1.0.0
+11 verbose cwd /Users/alex/code/hackathons/wb
+12 error Darwin 15.0.0
+13 error argv "/Users/alex/.nvm/versions/io.js/v3.3.1/bin/iojs" "/Users/alex/.nvm/versions/io.js/v3.3.1/bin/npm" "run" "babel-node" "server.js"
+14 error node v3.3.1
+15 error npm  v2.14.3
+16 error code ELIFECYCLE
+17 error wytbord@1.0.0 babel-node: `babel-node --stage 0 "server.js"`
+17 error Exit status 1
+18 error Failed at the wytbord@1.0.0 babel-node script 'babel-node --stage 0 "server.js"'.
+18 error This is most likely a problem with the wytbord package,
+18 error not with npm itself.
+18 error Tell the author that this fails on your system:
+18 error     babel-node --stage 0 "server.js"
+18 error You can get their info via:
+18 error     npm owner ls wytbord
+18 error There is likely additional logging output above.
+19 verbose exit [ 1, true ]
