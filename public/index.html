@@ -4,13 +4,25 @@
     <meta charset="UTF-8">
     <title>paper stuff</title>
 
+    <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
     <div id="container" class="canvas-container">
-        <canvas id="canvas" resize></canvas>
+        <div id="toolbar">
+            <div class="btn-group" role="group">
+                <button class="btn btn-default">Pen</button>
+                <button class="btn btn-default">Eraser</button>
+            </div>
+            <button ng-repeat="user in users" class="btn-default" ng-style=""></button>
+        </div>
+        <canvas id="canvas" resize="true" keepalive="true"></canvas>
     </div>
 
+
+    <script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="bower_components/angular/angular.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/bower_components/paper/dist/paper-full.min.js"></script>
 
