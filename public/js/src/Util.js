@@ -1,9 +1,6 @@
-var wb;
-(function(wb) {
+class Util {
 
-    wb.util = {};
-
-    wb.util.resizeCanvas = function($canvas, $parent) {
+    static resizeCanvas($canvas, $parent) {
         var aspect = $canvas.height / $canvas.width,
             width = $parent.offsetWidth,
             height = $parent.offsetHeight;
@@ -12,4 +9,6 @@ var wb;
         $canvas.height = Math.round(aspect * width);
     }
 
-})(wb || (wb = {}));
+}
+
+module.exports = Util;
