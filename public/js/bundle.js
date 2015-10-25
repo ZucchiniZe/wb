@@ -208,44 +208,6 @@
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var wb;
-	(function (wb) {
-
-	    wb.SocketEmitter = function () {
-	        var pm = function pm(socket) {
-	            this.socket = socket;
-	            this.lastData = null;
-	            this.nextData = null;
-	            this.dataSendActive = false;
-	            this.dataSendFn = null;
-	        };
-
-	        pm.prototype.setData = function (data) {
-	            this.dataToSend = data;
-	        };
-
-	        pm.prototype.sendData = function (eventName, data, once) {
-	            var self = this;
-
-	            self.setData({
-	                eventName: eventName,
-	                point: data.point
-	            });
-
-	            if (once) {
-	                socket.emit(self.dataToSend.eventName, JSON.stringify(self.dataToSend));
-	            } else if (!self.dataSendActive) {
-	                self.dataSendFn = setInterval(function emit() {
-	                    socket.emit(self.dataToSend.eventName, JSON.stringify(self.dataToSend));
-	                }, 25);
-	                self.dataSendActive = true;
-	            }
-	        };
-
-	        return pm;
-	    };
-	})(wb || (wb = {}));
-
 	var SocketEmitter = (function () {
 	    function SocketEmitter(socket) {
 	        _classCallCheck(this, SocketEmitter);
@@ -264,6 +226,7 @@
 
 	            var self = this;
 
+	            self.$$lastData = self.$$nextData;
 	            self.$$nextData = {
 	                eventName: eventName,
 	                point: data.point
@@ -273,7 +236,10 @@
 	                self.socket.emit(self.$$nextData.eventName, JSON.stringify(self.$$nextData));
 	            } else if (!self.dataSendActive) {
 	                self.dataSendFn = setInterval(function emit() {
-	                    self.socket.emit(self.$$nextData.eventName, JSON.stringify(self.$$nextData));
+	                    if (!SocketEmitter.$$dataEquals(self.$$lastData, self.$$nextData)) {
+	                        self.$$lastData = self.$$nextData;
+	                        self.socket.emit(self.$$nextData.eventName, JSON.stringify(self.$$nextData));
+	                    }
 	                }, 25);
 	                self.dataSendActive = true;
 	            }
@@ -293,6 +259,13 @@
 	        },
 	        set: function set(data) {
 	            this.$$nextData = data;
+	        }
+	    }], [{
+	        key: "$$dataEquals",
+	        value: function $$dataEquals(d1, d2) {
+	            if (d1.point && d2.point) {
+	                return d1.point.equals(d2.point);
+	            }
 	        }
 	    }]);
 

@@ -1,43 +1,3 @@
-var wb;
-(function(wb) {
-
-    wb.SocketEmitter = (function() {
-        var pm = function(socket) {
-            this.socket = socket;
-            this.lastData = null;
-            this.nextData = null;
-            this.dataSendActive = false;
-            this.dataSendFn = null;
-        };
-
-        pm.prototype.setData = function(data) {
-            this.dataToSend = data;
-        };
-
-        pm.prototype.sendData = function(eventName, data, once) {
-            var self = this;
-
-            self.setData({
-                eventName: eventName,
-                point: data.point
-            });
-
-            if (once) {
-                socket.emit(self.dataToSend.eventName, JSON.stringify(self.dataToSend));
-            }
-            else if (!self.dataSendActive) {
-                self.dataSendFn = setInterval(function emit() {
-                    socket.emit(self.dataToSend.eventName, JSON.stringify(self.dataToSend));
-                }, 25);
-                self.dataSendActive = true;
-            }
-        };
-
-        return pm;
-    })
-
-})(wb || (wb = {}));
-
 class SocketEmitter {
 
     constructor(socket) {
@@ -64,9 +24,16 @@ class SocketEmitter {
         this.$$nextData = data;
     }
 
+    static $$dataEquals(d1,d2) {
+        if (d1.point && d2.point) {
+            return d1.point.equals(d2.point);
+        }
+    }
+
     sendData(eventName, data, once = false) {
         var self = this;
 
+        self.$$lastData = self.$$nextData;
         self.$$nextData = {
             eventName: eventName,
             point: data.point
@@ -77,7 +44,10 @@ class SocketEmitter {
         }
         else if (!self.dataSendActive) {
             self.dataSendFn = setInterval(function emit() {
-                self.socket.emit(self.$$nextData.eventName, JSON.stringify(self.$$nextData));
+                if (!SocketEmitter.$$dataEquals(self.$$lastData,self.$$nextData)) {
+                    self.$$lastData = self.$$nextData;
+                    self.socket.emit(self.$$nextData.eventName, JSON.stringify(self.$$nextData));
+                }
             }, 25);
             self.dataSendActive = true;
         }
