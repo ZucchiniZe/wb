@@ -323,6 +323,7 @@
 
 	                $scope.clear = function () {
 	                    paper.project.clear();
+	                    paper.view.draw();
 	                };
 
 	                $scope.selectTool = function (type) {
