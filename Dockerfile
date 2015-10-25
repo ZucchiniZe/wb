@@ -15,4 +15,4 @@ RUN npm run compile
 
 EXPOSE 4000
 
-CMD ["node", "index.js"]
+CMD ["DEBUG=prod", "node", "index.js"]

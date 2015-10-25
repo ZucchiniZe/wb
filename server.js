@@ -1,4 +1,5 @@
 import express from 'express';
+import debug from 'debug';
 import morgan from 'morgan';
 import http from 'http';
 import Socket from 'socket.io';
@@ -7,6 +8,8 @@ import uid from 'uid';
 const app = express();
 const server = http.createServer(app);
 const io = Socket(server);
+const log = debug('dev');
+const prod = debug('prod');
 
 const port = 4000 || process.env['PORT'];
 
@@ -30,13 +33,14 @@ io.on('connection', function(socket) {
     var room = 'root';
     socket.on('health:alive', data => {
         room = data;
-        console.log('proper room name', data);
+        log('proper room name', data);
     });
 
     socket.join(room);
-    console.log('join room', room);
+    log('join room', room);
 
-    console.log('user connected');
+    log('user connected');
+    prod('user connected');
     let id = uid(10);
     let thisUser = {color: colors[Math.floor(Math.random() * 6)]};
 
@@ -50,30 +54,30 @@ io.on('connection', function(socket) {
         };
     };
 
-    console.log(users,thisUser);
+    log(users,thisUser);
     //finally, add user to room
     users[id] = thisUser;
 
     socket.on('disconnect', () => {
         socket.leave(room);
-        console.log('user disconnected');
+        log('user disconnected');
         delete users[id];
         socket.broadcast.to(room).emit('user:disconnect', id);
     });
 
     socket.on('pen:create', (data) => {
-        console.log('create line', data);
+        log('create line', data);
 
         socket.broadcast.to(room).emit('pen:create', data);
     });
 
     socket.on('pen:extend', (data) => {
-        console.log('drew line', data);
+        log('drew line', data);
 
         socket.broadcast.to(room).emit('pen:extend', data);
     });
 
-    console.log(io.sockets.adapter.rooms);
+    log(io.sockets.adapter.rooms);
 });
 
 console.log("server listening on port", port);
