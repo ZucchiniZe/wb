@@ -1,4 +1,5 @@
 import express from 'express';
+import morgan from 'morgan';
 import http from 'http';
 import Socket from 'socket.io';
 import uid from 'uid';
@@ -19,6 +20,7 @@ app.get('/b/*', (req, res) => {
 });
 
 app.use(express.static('public'));
+app.use(morgan('combined'));
 
 // keep track of users & available colors
 let users = {};
