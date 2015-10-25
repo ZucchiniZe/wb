@@ -13,7 +13,6 @@ RUN bower install --allow-root
 RUN npm run prod
 RUN npm run compile
 
-ENV PORT 8080
-EXPOSE 8080
+EXPOSE 4000
 
 CMD ["node", "index.js"]
