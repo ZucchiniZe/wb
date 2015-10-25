@@ -1,6 +1,6 @@
 import SocketEmitter from '../SocketEmitter';
 
-class SocketEmitterService {
+export default class SocketEmitterService {
 
     static hasInstance() {
         if (!this.$$instance) {
@@ -28,9 +28,7 @@ class SocketEmitterService {
                         }
                         return _instance;
                     }
-                }
-            }])
+                };
+            }]);
     }
-}
-
-module.exports = SocketEmitterService;
+};

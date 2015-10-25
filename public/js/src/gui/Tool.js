@@ -1,7 +1,7 @@
 import HandlerFactory from './HandlerFactory';
 import PathManagerService from './PathManagerService';
 
-class Tool {
+export default class Tool {
 
     static hasInstance() {
         if (!this.$$instance) {
@@ -28,25 +28,25 @@ class Tool {
                 'SocketEmitterService',
                 function ($rootScope, Handler, PathManager, SocketEmitter) {
 
-                var emitter = SocketEmitter.getInstance();
+                    var emitter = SocketEmitter.getInstance();
 
-                var stopDataSend = function() {
-                    clearInterval(emitter.dataSendFn);
-                    emitter.dataSendActive = false;
-                };
+                    var stopDataSend = function() {
+                        clearInterval(emitter.dataSendFn);
+                        emitter.dataSendActive = false;
+                    };
 
-                var tools = {};
+                    var tools = {};
 
-                return {
+                    return {
 
-                    get: function(type) {
-                        if (type) {
-                            return tools[type];
-                        }
-                    },
+                        get: function(type) {
+                            if (type) {
+                                return tools[type];
+                            }
+                        },
 
-                    make: function(opts) {
-                        switch (opts.type) {
+                        make: function(opts) {
+                            switch (opts.type) {
 
                             case 'pen':
                                 var pen = new paper.Tool();
@@ -66,10 +66,10 @@ class Tool {
                                     }
                                 });
                                 /*pen.onMouseMove = Handler.handleDrawCursor({
-                                    type: 'pen',
-                                    color: opts.color,
-                                    width: opts.width
-                                });*/
+                                 type: 'pen',
+                                 color: opts.color,
+                                 width: opts.width
+                                 });*/
                                 pen.onMouseUp = stopDataSend;
 
                                 socket.on('pen:create', Handler.handleNewPath(PathManager.getSocket()));
@@ -127,11 +127,11 @@ class Tool {
 
                                 tools.eraser = eraser;
                                 return eraser;
-                        }
-                    }
-                }
-            }])
-    }
-}
+                            }
 
-module.exports = Tool;
+                            return false;
+                        }
+                    };
+                }]);
+    }
+};

@@ -5,3 +5,4 @@ DS_Store
 npm-debug.log*
 .tern-port*
 ubiquipad_ec2.pem
+ec2.pem

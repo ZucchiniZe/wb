@@ -1,4 +1,4 @@
-class PathManager {
+export default class PathManager {
 
     constructor() {
         this.$$path = false;
@@ -35,6 +35,4 @@ class PathManager {
         this.$$prevPaths.push(path);
     }
 
-}
-
-module.exports = PathManager;
+};

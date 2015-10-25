@@ -1,4 +1,4 @@
-class Util {
+export default class Util {
 
     static resizeCanvas($canvas, $parent) {
         var aspect = $canvas.height / $canvas.width,
@@ -9,6 +9,4 @@ class Util {
         $canvas.height = Math.round(aspect * width);
     }
 
-}
-
-module.exports = Util;
+};
