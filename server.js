@@ -13,10 +13,24 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
 });
 
+app.get('/b/*', (req, res) => {
+    res.sendFile(__dirname + '/public/index.html');
+});
+
 app.use(express.static('public'));
 
 io.on('connection', function(socket) {
-    console.log('user connected');
+    socket.on('health:alive', data => {
+        socket.roomName = data || 'test';
+    });
+
+    console.log(socket.roomName);
+
+    socket.join(socket.roomName);
+
+    console.log(io.sockets.adapter.rooms);
+
+    // console.log('user connected');
 
     socket.on('disconnect', () => {
         console.log('user disconnected');
