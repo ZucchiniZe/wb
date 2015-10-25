@@ -56,7 +56,7 @@
 
 	var _SocketEmitter2 = _interopRequireDefault(_SocketEmitter);
 
-	var _guiGui = __webpack_require__(4);
+	var _guiGui = __webpack_require__(3);
 
 	var _guiGui2 = _interopRequireDefault(_guiGui);
 
@@ -74,6 +74,9 @@
 	window.onload = function () {
 	    var canvas = document.getElementById('canvas');
 	    paper.setup(canvas);
+
+	    // for angular to use in $window service
+	    window.wbcanvas = canvas;
 	};
 
 /***/ },
@@ -213,8 +216,7 @@
 	module.exports = SocketEmitter;
 
 /***/ },
-/* 3 */,
-/* 4 */
+/* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -225,11 +227,11 @@
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-	var _Users = __webpack_require__(5);
+	var _Users = __webpack_require__(4);
 
 	var _Users2 = _interopRequireDefault(_Users);
 
-	var _Tool = __webpack_require__(6);
+	var _Tool = __webpack_require__(5);
 
 	var _Tool2 = _interopRequireDefault(_Tool);
 
@@ -258,7 +260,7 @@
 	            _Users2['default'].init(angular, socket);
 	            _Tool2['default'].init(angular, socket);
 
-	            angular.module('wb:gui', ['wb:users', 'wb:tool', 'wb:service:pathmanager']).controller('gui', ['$scope', 'UsersService', 'ToolService', 'PathManagerService', function ($scope, UsersService, Tool, PathManager) {
+	            angular.module('wb:gui', ['wb:users', 'wb:tool', 'wb:service:pathmanager']).controller('gui', ['$scope', 'UsersService', 'ToolService', 'PathManagerService', '$window', function ($scope, UsersService, Tool, PathManager, $window) {
 
 	                var clientPath = PathManager.getClient(),
 	                    socketPath = PathManager.getSocket();
@@ -295,6 +297,10 @@
 	                    userColor += '0';
 	                }
 	                userColor += randomHex;
+
+	                $scope.clear = function () {
+	                    paper.project.clear();
+	                };
 
 	                $scope.selectTool = function (type) {
 	                    $scope.selectedTool = type;
@@ -334,7 +340,7 @@
 	module.exports = GUI;
 
 /***/ },
-/* 5 */
+/* 4 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -419,7 +425,7 @@
 	module.exports = Users;
 
 /***/ },
-/* 6 */
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -430,7 +436,7 @@
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-	var _HandlerFactory = __webpack_require__(7);
+	var _HandlerFactory = __webpack_require__(6);
 
 	var _HandlerFactory2 = _interopRequireDefault(_HandlerFactory);
 
@@ -577,7 +583,7 @@
 	module.exports = Tool;
 
 /***/ },
-/* 7 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -588,7 +594,7 @@
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-	var _SocketEmitterService = __webpack_require__(9);
+	var _SocketEmitterService = __webpack_require__(7);
 
 	var _SocketEmitterService2 = _interopRequireDefault(_SocketEmitterService);
 
@@ -714,6 +720,65 @@
 	module.exports = HandlerFactory;
 
 /***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+	var _SocketEmitter = __webpack_require__(2);
+
+	var _SocketEmitter2 = _interopRequireDefault(_SocketEmitter);
+
+	var SocketEmitterService = (function () {
+	    function SocketEmitterService() {
+	        _classCallCheck(this, SocketEmitterService);
+	    }
+
+	    _createClass(SocketEmitterService, null, [{
+	        key: 'hasInstance',
+	        value: function hasInstance() {
+	            if (!this.$$instance) {
+	                this.$$instance = true;
+	                return false;
+	            }
+	            return true;
+	        }
+	    }, {
+	        key: 'init',
+	        value: function init(angular, socket) {
+
+	            if (SocketEmitterService.hasInstance()) {
+	                return;
+	            }
+
+	            angular.module('wb:service:socketemitter', []).factory('SocketEmitterService', ['$rootScope', function ($rootScope) {
+
+	                var _instance = false;
+
+	                return {
+	                    getInstance: function getInstance() {
+	                        if (!_instance) {
+	                            _instance = new _SocketEmitter2['default'](socket);
+	                        }
+	                        return _instance;
+	                    }
+	                };
+	            }]);
+	        }
+	    }]);
+
+	    return SocketEmitterService;
+	})();
+
+	module.exports = SocketEmitterService;
+
+/***/ },
 /* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -778,65 +843,6 @@
 	})();
 
 	module.exports = PathManagerService;
-
-/***/ },
-/* 9 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
-	var _SocketEmitter = __webpack_require__(2);
-
-	var _SocketEmitter2 = _interopRequireDefault(_SocketEmitter);
-
-	var SocketEmitterService = (function () {
-	    function SocketEmitterService() {
-	        _classCallCheck(this, SocketEmitterService);
-	    }
-
-	    _createClass(SocketEmitterService, null, [{
-	        key: 'hasInstance',
-	        value: function hasInstance() {
-	            if (!this.$$instance) {
-	                this.$$instance = true;
-	                return false;
-	            }
-	            return true;
-	        }
-	    }, {
-	        key: 'init',
-	        value: function init(angular, socket) {
-
-	            if (SocketEmitterService.hasInstance()) {
-	                return;
-	            }
-
-	            angular.module('wb:service:socketemitter', []).factory('SocketEmitterService', ['$rootScope', function ($rootScope) {
-
-	                var _instance = false;
-
-	                return {
-	                    getInstance: function getInstance() {
-	                        if (!_instance) {
-	                            _instance = new _SocketEmitter2['default'](socket);
-	                        }
-	                        return _instance;
-	                    }
-	                };
-	            }]);
-	        }
-	    }]);
-
-	    return SocketEmitterService;
-	})();
-
-	module.exports = SocketEmitterService;
 
 /***/ }
 /******/ ]);

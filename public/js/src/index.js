@@ -17,4 +17,7 @@ GUI.init(angular, socket);
 window.onload = function () {
     var canvas = document.getElementById('canvas');
     paper.setup(canvas);
+
+    // for angular to use in $window service
+    window.wbcanvas = canvas;
 };
