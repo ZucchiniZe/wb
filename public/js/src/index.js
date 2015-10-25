@@ -1,14 +1,12 @@
 import PathManager from './PathManager';
 import SocketEmitter from './SocketEmitter';
+import GUI from './gui/gui';
 
 try {
-    let socket = io();
-    let pathname = window.location.pathname;
-    let path = pathname > 3 ? pathname.substring(3, pathname.length) : 'root';
-    socket.emit('health:alive', path);
-
+    var socket = io();
     paper.install(window);
-} catch (e) {
+}
+catch (e) {
     console.warn("paper.js or socket.io scripts didn't load synchronously before client script");
     throw e;
 }
@@ -19,6 +17,10 @@ var pen, eraser,
     emitter = new SocketEmitter(socket);
 
 window.onload = function () {
+    let pathname = window.location.pathname;
+    let path = pathname > 3 ? pathname.substring(3, pathname.length) : 'root';
+    socket.emit('health:alive', path);
+
 
     var canvas = document.getElementById('canvas');
     var container = document.getElementById('container');
@@ -108,3 +110,12 @@ function resizeCanvas($canvas, $parent) {
     $canvas.width = width;
     $canvas.height = Math.round(aspect * width);
 }
+=======
+// initialize the UI angular app
+GUI.init(angular, socket);
+
+window.onload = function () {
+    var canvas = document.getElementById('canvas');
+    paper.setup(canvas);
+};
+>>>>>>> 557eb4ae3f49e4c09bf90d3eea757839d6a30e83
