@@ -80,32 +80,50 @@
 /* 1 */
 /***/ function(module, exports) {
 
-	"use strict";
+	'use strict';
 
-	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
 	var PathManager = (function () {
 	    function PathManager() {
 	        _classCallCheck(this, PathManager);
 
 	        this.$$path = false;
+	        this.$$width = 1;
+	        this.$$color = 'black';
 	        this.$$prevPaths = [];
 	    }
 
 	    _createClass(PathManager, [{
-	        key: "pushPath",
+	        key: 'pushPath',
 	        value: function pushPath(path) {
 	            this.$$prevPaths.push(path);
 	        }
 	    }, {
-	        key: "path",
+	        key: 'path',
 	        get: function get() {
 	            return this.$$path;
 	        },
 	        set: function set(path) {
 	            this.$$path = path;
+	        }
+	    }, {
+	        key: 'width',
+	        get: function get() {
+	            return this.$$width;
+	        },
+	        set: function set(width) {
+	            this.$$width = width;
+	        }
+	    }, {
+	        key: 'color',
+	        get: function get() {
+	            return this.$$color;
+	        },
+	        set: function set(color) {
+	            this.$$color = color;
 	        }
 	    }]);
 
@@ -146,7 +164,10 @@
 	            self.$$lastData = self.$$nextData;
 	            self.$$nextData = {
 	                eventName: eventName,
-	                point: data.point
+	                point: data.point,
+	                delta: data.delta,
+	                width: data.width,
+	                color: data.color
 	            };
 
 	            if (once) {
@@ -237,16 +258,55 @@
 	            _Users2['default'].init(angular, socket);
 	            _Tool2['default'].init(angular, socket);
 
-	            angular.module('wb:gui', ['wb:users', 'wb:tool']).controller('gui', ['$scope', 'UsersService', 'ToolService', function ($scope, UsersService, Tool) {
+	            angular.module('wb:gui', ['wb:users', 'wb:tool', 'wb:service:pathmanager']).controller('gui', ['$scope', 'UsersService', 'ToolService', 'PathManagerService', function ($scope, UsersService, Tool, PathManager) {
+
+	                var clientPath = PathManager.getClient(),
+	                    socketPath = PathManager.getSocket();
+
+	                $scope.settings = {
+	                    pen: {
+	                        selectedSize: 5,
+	                        sizes: [1, 2.5, 5, 10, 20]
+	                    },
+	                    eraser: {
+	                        selectedSize: 5,
+	                        sizes: [5, 10, 20]
+	                    },
+	                    paint: {
+	                        selectedSize: 2.5,
+	                        sizes: [1, 2.5, 5, 10, 20]
+	                    }
+	                };
+
+	                var makeScopeTool = function makeScopeTool(type) {
+	                    clientPath.color = userColor;
+	                    return Tool.make({
+	                        type: type
+	                    });
+	                };
 
 	                /**
 	                 * Scope fns
 	                 */
+	                var randomHex = Math.floor(Math.random() * Math.pow(16, 6)).toString(16); // random for testing purposes, really get this from UsersService
+	                var userColor = '#',
+	                    i = randomHex.length;
+	                while (i-- < 6) {
+	                    userColor += '0';
+	                }
+	                userColor += randomHex;
 
-	                // Called as selectSize.call(toolObject, selectedSize);
-	                $scope.selectSize = function (size) {
-	                    this.selectedSize = size;
-	                    Tool.setSize(this.type);
+	                $scope.selectTool = function (type) {
+	                    $scope.selectedTool = type;
+	                    $scope[type] = makeScopeTool(type);
+	                    $scope[type].activate();
+	                };
+
+	                // Called as selectSize(toolType, selectedSize);
+	                $scope.selectSize = function (type, size) {
+	                    $scope.settings[type].selectedSize = size;
+	                    $scope.selectTool(type);
+	                    clientPath.width = size;
 	                };
 
 	                // Called as activate.call(toolObject);
@@ -260,25 +320,10 @@
 
 	                $scope.users = UsersService.users;
 
-	                $scope.pen = Object.assign(Tool.make({
-	                    type: 'pen',
-	                    color: 'black',
-	                    width: 2.5
-	                }), {
-	                    type: 'pen',
-	                    selectedSize: 2.5,
-	                    sizes: [2.5, 5, 10]
-	                });
-	                $scope.activate.call($scope.pen);
-
-	                $scope.eraser = {
-	                    type: 'eraser',
-	                    sizes: [5, 10, 20]
-	                };
-	                $scope.paintbrush = {
-	                    type: 'paint',
-	                    sizes: [2.5, 5, 10]
-	                };
+	                $scope.paint = makeScopeTool('paint');
+	                $scope.eraser = makeScopeTool('eraser');
+	                $scope.pen;
+	                $scope.selectTool('pen');
 	            }]);
 	        }
 	    }]);
@@ -430,14 +475,17 @@
 	                var tools = {};
 
 	                return {
+
+	                    get: function get(type) {
+	                        if (type) {
+	                            return tools[type];
+	                        }
+	                    },
+
 	                    make: function make(opts) {
 	                        switch (opts.type) {
 
 	                            case 'pen':
-	                                if (tools.pen) {
-	                                    return tools.pen;
-	                                }
-
 	                                var pen = new paper.Tool();
 
 	                                pen.minDistance = 5;
@@ -467,11 +515,7 @@
 	                                tools.pen = pen;
 	                                return pen;
 
-	                            case 'paintbrush':
-	                                if (tools.paint) {
-	                                    return tools.paint;
-	                                }
-
+	                            case 'paint':
 	                                var paint = new paper.Tool();
 
 	                                paint.minDistance = 5;
@@ -490,14 +534,13 @@
 	                                });
 	                                paint.onMouseUp = stopDataSend;
 
+	                                socket.on('paint:create', Handler.handleNewPath(PathManager.getSocket()));
+	                                socket.on('paint:extend', Handler.handleDrawPath(PathManager.getSocket()));
+
 	                                tools.paint = paint;
 	                                return paint;
 
 	                            case 'eraser':
-	                                if (tools.eraser) {
-	                                    return tools.eraser;
-	                                }
-
 	                                var eraser = new paper.Tool();
 
 	                                eraser.minDistance = 5;
@@ -588,6 +631,7 @@
 	                            if (typeof e === 'string') {
 	                                e = JSON.parse(e);
 	                                e.point = correctPoint(e);
+	                                pm.color = e.color;
 	                            }
 
 	                            // save reference to the old path
@@ -598,12 +642,12 @@
 
 	                            // set path properties
 	                            var path = pm.path;
-	                            path.strokeColor = opts && opts.color ? opts.color : 'black';
+	                            path.strokeColor = pm.color;
 
 	                            path.add(e.point);
 
 	                            if (opts && opts.emit) {
-	                                emitter.sendData(opts.emit.eventName, e, true);
+	                                emitter.sendData(opts.emit.eventName, Object.assign(e, { width: pm.width, color: pm.color }), true);
 	                            }
 	                        };
 	                    },
@@ -613,6 +657,8 @@
 	                            if (typeof e === 'string') {
 	                                e = JSON.parse(e);
 	                                e.point = correctPoint(e);
+	                                pm.width = e.width;
+	                                pm.color = e.color;
 	                            }
 
 	                            // there should already be a path on the pathmanager
@@ -621,7 +667,9 @@
 	                            // if paint, adjust stroke width based on delta
 	                            if (opts && opts.type === 'paint') {
 	                                var k = 50;
-	                                path.strokeWidth = k / e.delta;
+	                                path.strokeWidth = k * pm.width / e.delta;
+	                            } else {
+	                                path.strokeWidth = pm.width;
 	                            }
 
 	                            path.add(e.point);
@@ -632,7 +680,7 @@
 	                            paper.view.draw();
 
 	                            if (opts && opts.emit) {
-	                                emitter.sendData(opts.emit.eventName, e);
+	                                emitter.sendData(opts.emit.eventName, Object.assign(e, { width: pm.width, color: pm.color }));
 	                            }
 	                        };
 	                    },

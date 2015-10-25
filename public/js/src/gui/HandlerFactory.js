@@ -34,6 +34,7 @@ class HandlerFactory {
                             if (typeof e === 'string') {
                                 e = JSON.parse(e);
                                 e.point = correctPoint(e);
+                                pm.color = e.color;
                             }
 
                             // save reference to the old path
@@ -44,12 +45,12 @@ class HandlerFactory {
 
                             // set path properties
                             var path = pm.path;
-                            path.strokeColor = opts && opts.color ? opts.color : 'black';
+                            path.strokeColor = pm.color;
 
                             path.add(e.point);
 
                             if (opts && opts.emit) {
-                                emitter.sendData(opts.emit.eventName, e, true);
+                                emitter.sendData(opts.emit.eventName, Object.assign(e, {width: pm.width, color: pm.color}), true);
                             }
                         }
                     },
@@ -58,7 +59,9 @@ class HandlerFactory {
                         return function (e) {
                             if (typeof e === 'string') {
                                 e = JSON.parse(e);
-                                e.point = correctPoint(e)
+                                e.point = correctPoint(e);
+                                pm.width = e.width;
+                                pm.color = e.color;
                             }
 
                             // there should already be a path on the pathmanager
@@ -67,7 +70,10 @@ class HandlerFactory {
                             // if paint, adjust stroke width based on delta
                             if (opts && opts.type === 'paint') {
                                 let k = 50;
-                                path.strokeWidth = k / e.delta;
+                                path.strokeWidth = k * pm.width / e.delta;
+                            }
+                            else {
+                                path.strokeWidth = pm.width;
                             }
 
                             path.add(e.point);
@@ -78,7 +84,7 @@ class HandlerFactory {
                             paper.view.draw();
 
                             if (opts && opts.emit) {
-                                emitter.sendData(opts.emit.eventName, e);
+                                emitter.sendData(opts.emit.eventName, Object.assign(e, {width: pm.width, color: pm.color}));
                             }
                         }
                     },

@@ -38,14 +38,17 @@ class Tool {
                 var tools = {};
 
                 return {
+
+                    get: function(type) {
+                        if (type) {
+                            return tools[type];
+                        }
+                    },
+
                     make: function(opts) {
                         switch (opts.type) {
 
                             case 'pen':
-                                if (tools.pen) {
-                                    return tools.pen;
-                                }
-
                                 var pen = new paper.Tool();
 
                                 pen.minDistance = 5;
@@ -75,11 +78,7 @@ class Tool {
                                 tools.pen = pen;
                                 return pen;
 
-                            case 'paintbrush':
-                                if (tools.paint) {
-                                    return tools.paint;
-                                }
-
+                            case 'paint':
                                 var paint = new paper.Tool();
 
                                 paint.minDistance = 5;
@@ -98,14 +97,13 @@ class Tool {
                                 });
                                 paint.onMouseUp = stopDataSend;
 
+                                socket.on('paint:create', Handler.handleNewPath(PathManager.getSocket()));
+                                socket.on('paint:extend', Handler.handleDrawPath(PathManager.getSocket()));
+
                                 tools.paint = paint;
                                 return paint;
 
                             case 'eraser':
-                                if (tools.eraser) {
-                                    return tools.eraser;
-                                }
-
                                 var eraser = new paper.Tool();
 
                                 eraser.minDistance = 5;

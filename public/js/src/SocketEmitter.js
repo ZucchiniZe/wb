@@ -37,7 +37,10 @@ class SocketEmitter {
         self.$$lastData = self.$$nextData;
         self.$$nextData = {
             eventName: eventName,
-            point: data.point
+            point: data.point,
+            delta: data.delta,
+            width: data.width,
+            color: data.color
         };
 
         if (once) {

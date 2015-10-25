@@ -17,28 +17,68 @@ class GUI {
             return;
         }
 
-        Users.init(angular,socket);
-        Tool.init(angular,socket);
+        Users.init(angular, socket);
+        Tool.init(angular, socket);
 
-        angular.module('wb:gui', ['wb:users', 'wb:tool'])
+        angular.module('wb:gui', ['wb:users', 'wb:tool', 'wb:service:pathmanager'])
             .controller('gui', [
                 '$scope',
                 'UsersService',
                 'ToolService',
-                function($scope, UsersService, Tool) {
+                'PathManagerService',
+                function ($scope, UsersService, Tool, PathManager) {
+
+                    var clientPath = PathManager.getClient(),
+                        socketPath = PathManager.getSocket();
+
+                    $scope.settings = {
+                        pen: {
+                            selectedSize: 5,
+                            sizes: [1, 2.5, 5, 10, 20]
+                        },
+                        eraser: {
+                            selectedSize: 5,
+                            sizes: [5, 10, 20]
+                        },
+                        paint: {
+                            selectedSize: 2.5,
+                            sizes: [1, 2.5, 5, 10, 20]
+                        }
+                    };
+
+                    var makeScopeTool = function (type) {
+                        clientPath.color = userColor;
+                        return Tool.make({
+                            type: type
+                        });
+                    };
 
                     /**
                      * Scope fns
                      */
+                    var randomHex = (Math.floor((Math.random() * Math.pow(16, 6)))).toString(16); // random for testing purposes, really get this from UsersService
+                    var userColor = '#',
+                        i = randomHex.length;
+                    while (i-- < 6) {
+                        userColor += '0';
+                    }
+                    userColor += randomHex;
 
-                    // Called as selectSize.call(toolObject, selectedSize);
-                    $scope.selectSize = function(size) {
-                        this.selectedSize = size;
-                        Tool.setSize(this.type);
+                    $scope.selectTool = function (type) {
+                        $scope.selectedTool = type;
+                        $scope[type] = makeScopeTool(type);
+                        $scope[type].activate();
+                    };
+
+                    // Called as selectSize(toolType, selectedSize);
+                    $scope.selectSize = function (type, size) {
+                        $scope.settings[type].selectedSize = size;
+                        $scope.selectTool(type);
+                        clientPath.width = size;
                     };
 
                     // Called as activate.call(toolObject);
-                    $scope.activate = function() {
+                    $scope.activate = function () {
                         this.activate();
                     };
 
@@ -48,29 +88,15 @@ class GUI {
 
                     $scope.users = UsersService.users;
 
-                    $scope.pen = Object.assign(Tool.make({
-                        type: 'pen',
-                        color: 'black',
-                        width: 2.5
-                    }), {
-                        type: 'pen',
-                        selectedSize: 2.5,
-                        sizes: [2.5,5,10]
-                    });
-                    $scope.activate.call($scope.pen);
+                    $scope.paint = makeScopeTool('paint');
+                    $scope.eraser = makeScopeTool('eraser');
+                    $scope.pen;
+                    $scope.selectTool('pen');
 
-                    $scope.eraser = {
-                        type: 'eraser',
-                        sizes: [5,10,20]
-                    };
-                    $scope.paintbrush = {
-                        type: 'paint',
-                        sizes: [2.5,5,10]
-                    };
                 }
             ]);
-
     }
+
 }
 
 module.exports = GUI;
